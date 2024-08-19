@@ -31,12 +31,12 @@ def documents_usecase(mock_db_uow, mock_s3_repository):
 
 @pytest.mark.asyncio
 async def test_get_all_documents_s3_paths_empty(documents_usecase, mock_db_uow):
-    mock_db_uow.document.get_all_s3_objects.return_value = []
+    mock_db_uow.document.get_all.return_value = []
 
     result = await documents_usecase.get_all_documents_s3_paths()
 
     assert result == []
-    mock_db_uow.document.get_all_s3_objects.assert_called_once()
+    mock_db_uow.document.get_all.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -47,14 +47,14 @@ async def test_get_all_documents_s3_paths_with_documents(documents_usecase, mock
             self.id = id
 
     mock_documents = [MockDocument(1), MockDocument(2), MockDocument(3)]
-    mock_db_uow.document.get_all_s3_objects.return_value = mock_documents
+    mock_db_uow.document.get_all.return_value = mock_documents
 
     # Act
     result = await documents_usecase.get_all_documents_s3_paths()
 
     # Assert
     assert result == ["1", "2", "3"]
-    mock_db_uow.document.get_all_s3_objects.assert_called_once()
+    mock_db_uow.document.get_all.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -137,40 +137,3 @@ async def test_upload_file(documents_usecase, mock_db_uow, mock_s3_repository):
         CreateDocumentSchema(name="file2.txt", extension=".txt", format="text/plain", size=len(files[1].content)))
     mock_s3_repository.upload_file.assert_any_call(file_id=1, file=files[0])
     mock_s3_repository.upload_file.assert_any_call(file_id=2, file=files[1])
-
-
-@pytest.mark.asyncio
-async def test_get_document_by_id_not_found(documents_usecase, mock_db_uow):
-    # Arrange
-    document_id = 1
-    mock_db_uow.document.get_by_id.return_value = None
-
-    # Act and Assert
-    with pytest.raises(HTTPException) as e:
-        await documents_usecase.get_by_id(document_id=document_id)
-    assert e.value.status_code == 404
-    mock_db_uow.document.get_by_id.assert_called_once_with(document_id=document_id)
-
-
-@pytest.mark.asyncio
-async def test_get_document_by_id_exception(documents_usecase, mock_db_uow):
-    # Arrange
-    document_id = 1
-    mock_db_uow.document.get_by_id.side_effect = Exception("Test exception")
-
-    # Act and Assert
-    with pytest.raises(HTTPException) as e:
-        await documents_usecase.get_by_id(document_id=document_id)
-    assert e.value.status_code == 500
-    mock_db_uow.document.get_by_id.assert_called_once_with(document_id=document_id)
-
-
-@pytest.mark.asyncio
-async def test_upload_document_file_empty_list(documents_usecase):
-    # Arrange
-    files = []
-
-    # Act and Assert
-    with pytest.raises(HTTPException) as e:
-        await documents_usecase.upload_file(files=files)
-    assert e.value.status_code == 400

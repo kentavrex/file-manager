@@ -18,7 +18,7 @@ celery.conf.timezone = "Europe/Moscow"
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):  # noqa ARG001
     sender.add_periodic_task(
-        crontab(minute="*/1"),  # todo remake to hours="0/24"
+        crontab(hours="*/24"),
         celery.task(remove_irrelevant_documents).s(),
         name="remove irrelevant documents",
     )
