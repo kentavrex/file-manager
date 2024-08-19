@@ -59,7 +59,7 @@ class DocumentsUseCase:
                 while content := await file.read(1024):
                     await out_file.write(content)
         except Exception as e:
-            logging.error(f"Ошибка при загрузке файла: {e}")
+            logging.error(f"Upload file error: {e}")
 
     @staticmethod
     async def _delete_files_on_disk(file_names: Iterable[str]) -> None:
@@ -74,7 +74,7 @@ class DocumentsUseCase:
                 os.remove(file_path)
                 logging.info(f"File removed {file_path}")
         except Exception as e:
-            logging.error(f"Ошибка при удалении файлов: {e}")
+            logging.error(f"Delete file error: {e}")
 
     async def upload_file(self, files: list[UploadFile]) -> None:
         async with (
