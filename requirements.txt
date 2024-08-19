@@ -1,0 +1,39 @@
+#ORM
+SQLAlchemy~=2.0.18
+
+pydantic==2.7.0
+pydantic-settings==2.2.1
+
+fastapi==0.110.1
+starlette==0.37.2
+uvicorn~=0.20.0
+requests~=2.31.0
+punq==0.7.0
+
+# Clients for work with Postgres
+asyncpg==0.29.0
+
+# migrations
+alembic~=1.8.1
+
+# uploaded files are sent as "form data"
+python-multipart~=0.0.5
+
+pytest~=7.2.0
+
+aioboto3==13.1.1
+
+# timezones
+pytz==2023.3
+
+python-jose[cryptography]
+datetime~=5.1
+redis~=4.6.0
+fastapi-filter==1.1.0
+celery==5.3.4
+flower==2.0.1
+
+ruff==0.4.5
+
+aiohttp==3.9.5
+

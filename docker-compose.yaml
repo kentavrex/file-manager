@@ -1,0 +1,99 @@
+x-config-tmp: &config-tmp
+  build:
+    context: .
+#  env_file: app.env
+  volumes:
+    - ~/.ssh:/root/.ssh-localhost:ro
+    - logs:/var/log
+  user: root
+
+volumes:
+  logs: {}
+  pg_data: {}
+  minio-data: {}
+
+services:
+  back:
+    <<: *config-tmp
+    image: back
+    container_name: app_back
+    depends_on:
+      - db
+    command: "sh start-dev.sh"
+    restart: unless-stopped
+    volumes:
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+      - ./data:/app/data
+    tty: true
+
+    ports:
+      - "3006:8000"
+    networks:
+      - custom
+
+  db:
+    image: postgres:12.4-alpine
+    container_name: app_db
+    ports:
+      - "6432:6432"
+    environment:
+      POSTGRES_DB: test_db
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    volumes:
+      - pg_data:/var/lib/postgresql/dataFM
+    networks:
+      - custom
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"  # Port for S3 API
+      - "9001:9001"  # Port for MinIO Console (web UI)
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - custom
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - custom
+
+  celery:
+    build:
+      context: .
+#    env_file: app.env
+    command: celery -A worker.worker worker --loglevel=info
+    volumes:
+      - ./src:/usr/src/app
+    working_dir: /usr/src/app
+    depends_on:
+      - redis
+    networks:
+      - custom
+
+  celery-beat:
+    build:
+      context: .
+    command: celery -A worker.worker beat --loglevel=info
+    volumes:
+      - ./src:/usr/src/app
+    working_dir: /usr/src/app
+    #    env_file: app.env
+    depends_on:
+      - redis
+    networks:
+      - custom
+
+networks:
+  custom:
+    driver: bridge
