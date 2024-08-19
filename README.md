@@ -23,10 +23,14 @@ Use Swagger to feel good :)
 - Docker compose
 
 ## Running
-`docker compose up --build`
+1. `docker compose up --build`
+2. Open `http://localhost:9001/` with minioadmin:minioadmin creds
+3. Create _documents_ bucket
 
 - Base URL: `http://localhost:3006/`
 - Swagger URL: `http://localhost:3006/docs`
+- Minio (UI for S3) URL: `http://localhost:9001/`
+
 
 Endpoints:
 - GET /documents/{document_id}
